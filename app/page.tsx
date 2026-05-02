@@ -144,7 +144,7 @@ export default function Home() {
        <header className="relative z-10 mx-auto grid max-w-6xl grid-cols-[1fr_auto_1fr] items-center">
   <nav className="hidden items-center justify-end gap-8 text-sm font-bold uppercase text-zinc-100 md:flex">
     <button onClick={() => scrollToSection("ben-kimim")} className="hover:text-orange-400">
-  Ben Kimim
+  Ben Kimim?
 </button>
     <button onClick={() => scrollToSection("platformlar")} className="hover:text-orange-400">
   Platformlar
@@ -186,7 +186,7 @@ export default function Home() {
   onClick={() => scrollToSection("platformlar")}
   className="rounded-full border border-zinc-700 px-6 py-3 text-center font-bold text-white transition hover:border-orange-400 hover:text-orange-400"
 >
-  Platformları Gör
+  Platformlar
 </button>
   </nav>
 
@@ -211,7 +211,7 @@ export default function Home() {
   onClick={() => scrollToSection("iletisim")}
   className="rounded-full bg-orange-500 px-6 py-3 text-center font-bold text-black transition hover:bg-orange-400"
 >
-  İletişime Geç
+  İletişim
 </button>
   </nav>
 </div>
