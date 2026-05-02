@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 
 type IconType = "instagram" | "youtube" | "tiktok" | "mail" | null;
@@ -127,6 +128,12 @@ function SocialIcon({ type }: { type: IconType }) {
 
 export default function Home() {
   const marqueeBrands = [...brands, ...brands];
+    const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
 
   return (
     <main className="min-h-screen bg-[#0f0f0f] text-white">
@@ -136,8 +143,12 @@ export default function Home() {
 
        <header className="relative z-10 mx-auto grid max-w-6xl grid-cols-[1fr_auto_1fr] items-center">
   <nav className="hidden items-center justify-end gap-8 text-sm font-bold uppercase text-zinc-100 md:flex">
-    <a href="#ben-kimim" className="hover:text-orange-400">Ben Kimim?</a>
-    <a href="#platformlar" className="hover:text-orange-400">Platformlar</a>
+    <button onClick={() => scrollToSection("ben-kimim")} className="hover:text-orange-400">
+  Ben Kimim
+</button>
+    <button onClick={() => scrollToSection("platformlar")} className="hover:text-orange-400">
+  Platformlar
+</button>
   </nav>
 
   <a href="/" className="mx-12 hidden shrink-0 md:block">
@@ -152,8 +163,12 @@ export default function Home() {
   </a>
 
   <nav className="hidden items-center justify-start gap-8 text-sm font-bold uppercase text-zinc-100 md:flex">
-    <a href="#markalar" className="hover:text-orange-400">Markalar</a>
-    <a href="#iletisim" className="hover:text-orange-400">İletişim</a>
+    <button onClick={() => scrollToSection("markalar")} className="hover:text-orange-400">
+  Markalar
+</button>
+    <button onClick={() => scrollToSection("iletisim")} className="hover:text-orange-400">
+  İletişim
+</button>
   </nav>
 </header>
 
@@ -161,12 +176,18 @@ export default function Home() {
           <div className="pt-0 md:pt-6">
 <div className="mb-7 grid grid-cols-[1fr_auto_1fr] items-center gap-3 md:hidden">
   <nav className="flex flex-col items-end gap-2 text-[12px] font-bold uppercase leading-none text-zinc-100">
-    <a href="#ben-kimim" className="hover:text-orange-400">
-      Ben Kimim?
-    </a>
-    <a href="#platformlar" className="hover:text-orange-400">
-      Platformlar
-    </a>
+    <button
+  onClick={() => scrollToSection("platformlar")}
+  className="rounded-full border border-zinc-700 px-6 py-3 text-center font-bold text-white transition hover:border-orange-400 hover:text-orange-400"
+>
+  Ben Kimim?
+</button>
+   <button
+  onClick={() => scrollToSection("platformlar")}
+  className="rounded-full border border-zinc-700 px-6 py-3 text-center font-bold text-white transition hover:border-orange-400 hover:text-orange-400"
+>
+  Platformları Gör
+</button>
   </nav>
 
   <div className="relative h-[105px] w-[120px] overflow-hidden">
@@ -180,12 +201,18 @@ export default function Home() {
   </div>
 
   <nav className="flex flex-col items-start gap-2 text-[12px] font-bold uppercase leading-none text-zinc-100">
-    <a href="#markalar" className="hover:text-orange-400">
-      Markalar
-    </a>
-    <a href="#iletisim" className="hover:text-orange-400">
-      İletişim
-    </a>
+    <button
+  onClick={() => scrollToSection("platformlar")}
+  className="rounded-full border border-zinc-700 px-6 py-3 text-center font-bold text-white transition hover:border-orange-400 hover:text-orange-400"
+>
+  Markalar
+</button>
+    <button
+  onClick={() => scrollToSection("iletisim")}
+  className="rounded-full bg-orange-500 px-6 py-3 text-center font-bold text-black transition hover:bg-orange-400"
+>
+  İletişime Geç
+</button>
   </nav>
 </div>
 
