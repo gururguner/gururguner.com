@@ -485,6 +485,13 @@ export default function Home() {
             </a>
           </div>
 
+          <a
+            href="/linklerim"
+            className="rounded-full border border-zinc-700 px-5 py-2 text-sm font-bold text-zinc-200 transition hover:border-orange-400 hover:text-orange-400"
+          >
+            Kullandığım Ürünler →
+          </a>
+
           <p className="text-center text-sm text-zinc-500">
             © 2026 Gurur Güner
           </p>
