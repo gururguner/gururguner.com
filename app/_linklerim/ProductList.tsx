@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { STORE_LABELS, type Product, type Store } from "./data";
+import { formatPrice, STORE_LABELS, type Product, type Store } from "./data";
 import { encodeQr, qrToSvgPath } from "./qr";
 
 const STORE_STYLES: Record<Store, string> = {
@@ -139,6 +139,11 @@ export function ProductList({ products }: { products: Product[] }) {
                   {STORE_LABELS[product.store]}
                 </span>
                 <h3 className="mt-1 font-bold leading-snug">{product.name}</h3>
+                {product.price !== undefined && (
+                  <p className="mt-0.5 text-sm font-bold text-orange-400" title="Yaklaşık fiyat; güncel fiyat mağazada">
+                    ~{formatPrice(product.price)}
+                  </p>
+                )}
                 {product.note && <p className="mt-0.5 text-sm leading-5 text-zinc-400">{product.note}</p>}
               </div>
             </a>
