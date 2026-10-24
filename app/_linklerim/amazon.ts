@@ -70,7 +70,8 @@ export async function resolveShortLink(url: string): Promise<string | undefined>
 function credentials() {
   const id = process.env.AMAZON_CREDENTIAL_ID?.trim();
   const secret = process.env.AMAZON_CREDENTIAL_SECRET?.trim();
-  const version = process.env.AMAZON_CREDENTIAL_VERSION?.trim();
+  // Amazon sürümü "v3.2" ya da "3.2" olarak gösterebiliyor; ikisini de kabul et.
+  const version = process.env.AMAZON_CREDENTIAL_VERSION?.trim().replace(/^v/i, "");
   const partnerTag = process.env.AMAZON_PARTNER_TAG?.trim();
   if (!id || !secret || !version || !partnerTag) return undefined;
   return { id, secret, version, partnerTag };
