@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import { LinklerimView } from "../_linklerim/LinklerimView";
-import { categories, SITE_URL, totalProducts } from "../_linklerim/data";
+import { SITE_URL } from "../_linklerim/data";
 
-// Sayfa en fazla saatte bir yeniden oluşturulur; Amazon fiyat ve stokları böyle güncel kalır.
-export const revalidate = 3600;
+// Sayfa en fazla 5 dakikada bir yeniden oluşturulur: Google Sheets'teki değişiklikler böyle yansır.
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Linklerim · Gurur Güner",
-  description: `Kullandığım ve önerdiğim ürünler · ${categories.length} kategori · ${totalProducts} ürün`,
+  description: "Kullandığım ve önerdiğim ürünler",
   openGraph: {
     title: "Linklerim · Gurur Güner",
-    description: `Kullandığım ve önerdiğim ürünler · ${categories.length} kategori · ${totalProducts} ürün`,
+    description: "Kullandığım ve önerdiğim ürünler",
     url: "/linklerim",
     images: ["/gurur.png"],
     type: "website",

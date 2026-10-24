@@ -15,6 +15,8 @@ function formatStamp(iso: string): string {
 /** /linklerim ve kısa kategori adresleri (/3d, /ekipman...) aynı sayfayı gösterir. */
 export async function LinklerimView({ initialOpen }: { initialOpen?: string }) {
   const catalog = await getCatalog();
+  // Boş kategoriler listede görünmez (kısa adresiyle açılan kategori hariç).
+  const visible = catalog.categories.filter((c) => c.products.length > 0 || c.slug === initialOpen);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#0f0f0f] px-5 py-10 text-white">
@@ -23,9 +25,9 @@ export async function LinklerimView({ initialOpen }: { initialOpen?: string }) {
 
       <div className="relative z-10 mx-auto max-w-xl">
         <LinklerimHeader
-          subtitle={`Kullandığım ve önerdiğim ürünler · ${catalog.categories.length} kategori · ${catalog.totalProducts} ürün`}
+          subtitle={`Kullandığım ve önerdiğim ürünler · ${visible.length} kategori · ${catalog.totalProducts} ürün`}
         />
-        <CategoryAccordion categories={catalog.categories} initialOpen={initialOpen} />
+        <CategoryAccordion categories={visible} initialOpen={initialOpen} />
         {catalog.amazonUpdatedAt && (
           <p className="mt-6 text-center text-xs leading-5 text-zinc-500">
             Amazon fiyatları ve stok durumu {formatStamp(catalog.amazonUpdatedAt)} itibarıyla alındı; güncel fiyat

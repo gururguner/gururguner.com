@@ -1,25 +1,42 @@
 import { extractAsin, getAmazonItems, resolveShortLink } from "./amazon";
-import { categories, fallbackName, storeOf, type Category, type Product, type Store } from "./data";
+import { RESERVED_SLUGS, slugify, type Store } from "./data";
+import { getSheetData, type SheetOffer } from "./sheet";
 
-/** Sayfada gösterilen, canlı verilerle birleştirilmiş ürün */
-export type LiveProduct = {
-  id: string;
-  name: string;
-  note?: string;
+/** Bir ürünün tek bir mağazadaki linki */
+export type LiveOffer = {
+  /** gururguner.com/git/<goId> */
+  goId: string;
   store: Store;
   price?: number;
-  image?: string;
-  code?: string;
-  reviewUrl?: string;
-  /** undefined: bilinmiyor (elle girilen ürün) */
+  /** undefined: bilinmiyor */
   inStock?: boolean;
-  /** Fiyat Amazon'dan canlı mı geldi */
+  /** Fiyat mağazadan canlı mı geldi (Amazon) */
   livePrice: boolean;
-  /** QR kodunda kullanılacak, doğrudan mağazaya giden link */
+  /** Bu ürün için en ucuz mağaza mı (en az iki fiyatlı mağaza varsa) */
+  cheapest: boolean;
+  code?: string;
+  /** QR kodunda kullanılan, doğrudan mağazaya giden link */
   directUrl: string;
 };
 
-export type LiveCategory = Omit<Category, "products"> & { products: LiveProduct[] };
+export type LiveProduct = {
+  id: string;
+  name: string;
+  image?: string;
+  note?: string;
+  video?: string;
+  offers: LiveOffer[];
+  minPrice?: number;
+  allOutOfStock: boolean;
+};
+
+export type LiveCategory = {
+  slug: string;
+  title: string;
+  emoji: string;
+  description: string;
+  products: LiveProduct[];
+};
 
 export type Catalog = {
   categories: LiveCategory[];
@@ -42,60 +59,125 @@ export function withAmazonTag(url: string): string {
   }
 }
 
-async function asinOf(product: Product): Promise<string | undefined> {
-  if (storeOf(product) !== "amazon") return undefined;
-  return extractAsin(product.url) ?? (await resolveShortLink(product.url));
+// Stoktakiler ucuzdan pahalıya, fiyatı bilinmeyenler sonra, stokta olmayanlar en sonda.
+function rank(price: number | undefined, outOfStock: boolean): number {
+  return outOfStock ? 2 : price === undefined ? 1 : 0;
 }
 
-// Stoktakiler ucuzdan pahalıya, fiyatı bilinmeyenler sonra, stokta olmayanlar en sonda.
-function compareProducts(a: LiveProduct, b: LiveProduct): number {
-  const rank = (p: LiveProduct) => (p.inStock === false ? 2 : p.price === undefined ? 1 : 0);
-  const r = rank(a) - rank(b);
+function compare(aPrice: number | undefined, aOut: boolean, bPrice: number | undefined, bOut: boolean): number {
+  const r = rank(aPrice, aOut) - rank(bPrice, bOut);
   if (r !== 0) return r;
-  if (a.price !== undefined && b.price !== undefined) return a.price - b.price;
+  if (aPrice !== undefined && bPrice !== undefined) return aPrice - bPrice;
   return 0;
 }
 
-export async function getCatalog(): Promise<Catalog> {
-  const all = categories.flatMap((c) => c.products);
-  const asinById = new Map<string, string>();
-  await Promise.all(
-    all.map(async (p) => {
-      const asin = await asinOf(p);
-      if (asin) asinById.set(p.id, asin);
-    }),
-  );
+function uniqueId(base: string, used: Set<string>): string {
+  let id = base || "urun";
+  for (let i = 2; used.has(id); i++) id = `${base}-${i}`;
+  used.add(id);
+  return id;
+}
 
-  const amazon = await getAmazonItems([...asinById.values()]);
+export async function getCatalog(): Promise<Catalog> {
+  const sheet = await getSheetData();
+
+  // Amazon linklerinden ASIN bul (kısa linkler dahil)
+  const asinOf = new Map<SheetOffer, string>();
+  await Promise.all(
+    sheet.offers
+      .filter((o) => o.store === "amazon")
+      .map(async (o) => {
+        const asin = extractAsin(o.url) ?? (await resolveShortLink(o.url));
+        if (asin) asinOf.set(o, asin);
+      }),
+  );
+  const amazon = await getAmazonItems([...asinOf.values()]);
   if (amazon.error) console.warn(`[linklerim] Amazon: ${amazon.error}`);
 
-  const live = (p: Product): LiveProduct => {
-    const asin = asinById.get(p.id);
-    const a = asin ? amazon.items.get(asin) : undefined;
-    const store = storeOf(p);
-    return {
-      id: p.id,
-      name: p.name ?? a?.title ?? fallbackName(p),
-      note: p.note,
-      store,
-      price: a?.price ?? p.price,
-      image: p.image ?? a?.image,
-      code: p.code,
-      reviewUrl: p.reviewUrl,
-      inStock: a ? a.inStock : undefined,
-      livePrice: a?.price !== undefined,
-      directUrl: store === "amazon" ? withAmazonTag(p.url) : p.url,
-    };
-  };
+  const productIds = new Set<string>();
+  const goIds = new Set<string>();
+  const categorySlugs = new Set<string>();
 
-  const liveCategories = categories.map((c) => ({
-    ...c,
-    products: c.products.map(live).sort(compareProducts),
-  }));
+  const categories: LiveCategory[] = sheet.categories.map((cat) => {
+    let slug = slugify(cat.slug || cat.name);
+    if (RESERVED_SLUGS.has(slug)) slug = `${slug}-urunler`;
+    slug = uniqueId(slug, categorySlugs);
+
+    // Aynı "Ürün adı"na sahip satırlar tek ürün altında birleşir.
+    const groups = new Map<string, SheetOffer[]>();
+    for (const o of sheet.offers) {
+      if (o.category.trim() !== cat.name.trim()) continue;
+      const asin = asinOf.get(o);
+      const key = o.name ? `ad:${o.name.trim().toLocaleLowerCase("tr-TR")}` : asin ? `asin:${asin}` : `url:${o.url}`;
+      groups.set(key, [...(groups.get(key) ?? []), o]);
+    }
+
+    const products: LiveProduct[] = [...groups.values()].map((rows) => {
+      const named = rows.find((r) => r.name);
+      const amazonItems = rows.map((r) => asinOf.get(r)).map((a) => (a ? amazon.items.get(a) : undefined));
+      const firstAsin = rows.map((r) => asinOf.get(r)).find(Boolean);
+      const name = named?.name ?? amazonItems.find((a) => a?.title)?.title ?? "Ürün";
+      const id = uniqueId(named?.name ? slugify(named.name) : firstAsin ? firstAsin.toLowerCase() : slugify(name), productIds);
+
+      const offers = rows
+        .map((r, i): LiveOffer & { _out: boolean } => {
+          const a = amazonItems[i];
+          const inStock = a ? a.inStock : r.outOfStock ? false : undefined;
+          return {
+            goId: uniqueId(`${id}-${r.store}`, goIds),
+            store: r.store,
+            price: a?.price ?? r.price,
+            inStock,
+            livePrice: a?.price !== undefined,
+            cheapest: false,
+            code: r.code,
+            directUrl: r.store === "amazon" ? withAmazonTag(r.url) : r.url,
+            _out: inStock === false,
+          };
+        })
+        .sort((x, y) => compare(x.price, x._out, y.price, y._out));
+
+      const priced = offers.filter((o) => !o._out && o.price !== undefined);
+      if (priced.length >= 2) priced[0].cheapest = true;
+
+      return {
+        id,
+        name,
+        image: rows.find((r) => r.image)?.image ?? amazonItems.find((a) => a?.image)?.image,
+        note: rows.find((r) => r.note)?.note,
+        video: rows.find((r) => r.video)?.video,
+        offers: offers.map(({ _out, ...o }) => o),
+        minPrice: priced[0]?.price,
+        allOutOfStock: offers.length > 0 && offers.every((o) => o._out),
+      };
+    });
+
+    products.sort((a, b) => compare(a.minPrice, a.allOutOfStock, b.minPrice, b.allOutOfStock));
+
+    return {
+      slug,
+      title: cat.name,
+      emoji: cat.emoji || "🛍️",
+      description: cat.description || "",
+      products,
+    };
+  });
 
   return {
-    categories: liveCategories,
-    totalProducts: all.length,
+    categories,
+    totalProducts: categories.reduce((n, c) => n + c.products.length, 0),
     amazonUpdatedAt: amazon.items.size > 0 ? amazon.fetchedAt?.toISOString() : undefined,
   };
+}
+
+/** /git/<goId> için: mağaza linkini bulur */
+export async function findOffer(goId: string): Promise<string | undefined> {
+  const catalog = await getCatalog();
+  for (const c of catalog.categories) {
+    for (const p of c.products) {
+      const o = p.offers.find((offer) => offer.goId === goId);
+      if (o) return o.directUrl;
+    }
+  }
+  return undefined;
 }

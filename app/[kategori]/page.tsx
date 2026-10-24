@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getCatalog } from "../_linklerim/catalog";
+import { SITE_URL } from "../_linklerim/data";
 import { LinklerimView } from "../_linklerim/LinklerimView";
-import { categories, getCategory, SITE_URL } from "../_linklerim/data";
 
-// Kısa kategori adresleri (gururguner.com/3d, /ekipman ...) Linklerim sayfasını o kategori açık şekilde gösterir.
-// Listede olmayan bir adres 404 verir.
-// Sayfa en fazla saatte bir yeniden oluşturulur; Amazon fiyat ve stokları böyle güncel kalır.
-export const revalidate = 3600;
+// Kısa kategori adresleri (gururguner.com/3d, /akilliev ...) Linklerim sayfasını o kategori açık şekilde gösterir.
+// Kategoriler Google Sheets'ten geldiği için sonradan eklenen kategoriler de ilk ziyarette oluşturulur.
+export const revalidate = 300;
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const { categories } = await getCatalog();
   return categories.map((c) => ({ kategori: c.slug }));
 }
 
@@ -18,26 +17,21 @@ type Props = { params: Promise<{ kategori: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { kategori } = await params;
-  const category = getCategory(kategori);
+  const category = (await getCatalog()).categories.find((c) => c.slug === kategori);
   if (!category) return {};
   const title = `${category.title} · Gurur Güner`;
-  const description = `${category.description} · ${category.products.length} ürün`;
+  const description = [category.description, `${category.products.length} ürün`].filter(Boolean).join(" · ");
   return {
     metadataBase: new URL(SITE_URL),
     title,
     description,
-    openGraph: {
-      title,
-      description,
-      url: `/${category.slug}`,
-      images: ["/gurur.png"],
-      type: "website",
-    },
+    openGraph: { title, description, url: `/${category.slug}`, images: ["/gurur.png"], type: "website" },
   };
 }
 
 export default async function KategoriPage({ params }: Props) {
   const { kategori } = await params;
-  if (!getCategory(kategori)) notFound();
+  const { categories } = await getCatalog();
+  if (!categories.some((c) => c.slug === kategori)) notFound();
   return <LinklerimView initialOpen={kategori} />;
 }
