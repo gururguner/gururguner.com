@@ -1,37 +1,45 @@
 /*
  * LİNKLERİM — ÜRÜN LİSTESİ
  * ------------------------------------------------------------------
- * Yeni ürün eklemek için ilgili kategorinin `products` listesine bir satır ekle.
+ * Yeni ürün eklemek için ilgili kategorinin `products` listesine bir blok ekle.
  *
+ * AMAZON ÜRÜNÜ — sadece id ve link yeterli:
+ *   { id: "kettle", url: "https://www.amazon.com.tr/dp/B0DP3JZW88" },
+ *   Ad, görsel, fiyat ve stok Amazon'dan otomatik gelir ve saatlik güncellenir.
+ *   amzn.to kısa linkleri de olur. Linke etiket (tag) eklemene gerek yok; otomatik eklenir.
+ *
+ * TRENDYOL / HEPSİBURADA / DİĞER — ad ve fiyatı elle yaz:
+ *   { id: "k1c", name: "Creality K1C", url: "https://ty.gl/...", price: 18999 },
+ *
+ * Alanlar:
  *   id        → benzersiz kısa ad. Link şu olur: gururguner.com/git/<id>
  *               Videolarda bu linki paylaşabilirsin; ürün linki değişse bile
  *               sadece `url`'i güncellemen yeterli, eski paylaşımlar bozulmaz.
- *   name      → ürün adı
+ *   url       → satış ortaklığı (affiliate) linkin. Mağaza linkten otomatik anlaşılır.
+ *   name      → ürün adı (Amazon'da opsiyonel; yazarsan Amazon'un uzun adı yerine bu görünür)
+ *   price     → fiyat, sadece rakam: 1299 ya da 24999.90 (Amazon'da otomatik)
+ *               Ürünler kategori içinde ucuzdan pahalıya otomatik sıralanır.
  *   note      → (opsiyonel) kısa açıklama: "3 yıldır kullanıyorum" gibi
- *   store     → hangi mağaza: "trendyol" | "hepsiburada" | "amazon" | "resmi" | "diger"
- *   url       → satış ortaklığı (affiliate) linkin
- *   price     → (opsiyonel) fiyat, sadece rakam: 1299 ya da 24999.90
- *               Ürünler kategorisi içinde ucuzdan pahalıya otomatik sıralanır;
- *               fiyatı girilmeyen ürünler en sona düşer. Sırayla yazman gerekmez.
  *   image     → (opsiyonel) /public/urunler/ içine koyduğun görsel, ör. "/urunler/k1c.jpg"
  *   code      → (opsiyonel) indirim kodu; sayfada kopyala butonuyla görünür
  *   reviewUrl → (opsiyonel) ürünün inceleme videosu
+ *   store     → (opsiyonel) mağazayı elle belirtmek için: "trendyol" | "hepsiburada" | "amazon" | "resmi" | "diger"
  *
- * Yeni kategori eklemek için `categories` listesine bir blok ekle.
+ * Yeni kategori eklemek için `categoryList` listesine bir blok ekle.
  * `slug` sayfanın adresi olur: gururguner.com/<slug>
  *
- * NOT: Aşağıdaki ürünler ve fiyatlar ÖRNEKTİR. Linkler mağaza aramasına gidiyor;
- * yayına almadan önce kendi ürünlerin ve affiliate linklerinle değiştir.
+ * NOT: Trendyol/Hepsiburada ürünleri ve fiyatları ÖRNEKTİR; kendi linklerinle değiştir.
+ * Amazon ürünleri Amazon vitrinindeki listenden alındı.
  */
 
 export type Store = "trendyol" | "hepsiburada" | "amazon" | "resmi" | "diger";
 
 export type Product = {
   id: string;
-  name: string;
-  note?: string;
-  store: Store;
   url: string;
+  name?: string;
+  note?: string;
+  store?: Store;
   price?: number;
   image?: string;
   code?: string;
@@ -57,7 +65,6 @@ const categoryList: Category[] = [
         id: "creality-yazici",
         name: "Creality 3D Yazıcı",
         note: "Örnek ürün — kendi linkinle değiştir",
-        store: "trendyol",
         url: "https://www.trendyol.com/sr?q=creality%203d%20yazici",
         price: 18999,
       },
@@ -89,7 +96,6 @@ const categoryList: Category[] = [
         id: "dji",
         name: "DJI Kamera / Gimbal",
         note: "Örnek ürün — kendi linkinle değiştir",
-        store: "trendyol",
         url: "https://www.trendyol.com/sr?q=dji",
         price: 12999,
       },
@@ -97,7 +103,6 @@ const categoryList: Category[] = [
         id: "hollyland-mikrofon",
         name: "Hollyland Kablosuz Mikrofon",
         note: "Örnek ürün — kendi linkinle değiştir",
-        store: "hepsiburada",
         url: "https://www.hepsiburada.com/ara?q=hollyland",
         price: 7499,
       },
@@ -109,22 +114,9 @@ const categoryList: Category[] = [
     description: "Çalıştığım ve kurguladığım masadaki her şey",
     emoji: "🖥️",
     products: [
-      {
-        id: "razer",
-        name: "Razer Klavye / Mouse",
-        note: "Örnek ürün — kendi linkinle değiştir",
-        store: "trendyol",
-        url: "https://www.trendyol.com/sr?q=razer",
-        price: 3299,
-      },
-      {
-        id: "havit",
-        name: "Havit Kulaklık",
-        note: "Örnek ürün — kendi linkinle değiştir",
-        store: "trendyol",
-        url: "https://www.trendyol.com/sr?q=havit",
-        price: 899,
-      },
+      { id: "anker-45w", name: "Anker Nano 45W USB-C Şarj Cihazı", url: "https://www.amazon.com.tr/dp/B0GQLKGD1F" },
+      { id: "wd-8tb", name: "WD Elements 8 TB Harici Disk", url: "https://www.amazon.com.tr/dp/B07FNK6QMT" },
+      { id: "xenon-tornavida", name: "Xenon Smart Şarjlı Hassas Tornavida Seti", url: "https://www.amazon.com.tr/dp/B0F4RNYBBN" },
     ],
   },
   {
@@ -133,22 +125,9 @@ const categoryList: Category[] = [
     description: "Evimde kullandığım akıllı cihazlar",
     emoji: "🏠",
     products: [
-      {
-        id: "keenetic-router",
-        name: "Keenetic Router",
-        note: "Örnek ürün — kendi linkinle değiştir",
-        store: "trendyol",
-        url: "https://www.trendyol.com/sr?q=keenetic",
-        price: 4499,
-      },
-      {
-        id: "ezviz-kamera",
-        name: "EZVIZ Güvenlik Kamerası",
-        note: "Örnek ürün — kendi linkinle değiştir",
-        store: "trendyol",
-        url: "https://www.trendyol.com/sr?q=ezviz",
-        price: 1499,
-      },
+      { id: "ezviz-diafon", name: "EZVIZ CS-DP2 Kablosuz Görüntülü Diafon", url: "https://www.amazon.com.tr/dp/B0F3X4JF3B" },
+      { id: "xiaomi-kettle", name: "Xiaomi Smart Kettle 2 Pro", url: "https://www.amazon.com.tr/dp/B0DP3JZW88" },
+      { id: "philips-hava-temizleyici", name: "Philips 3400 Hava Temizleyici ve Nemlendirici", url: "https://www.amazon.com.tr/dp/B0D9YNY3DN" },
     ],
   },
   {
@@ -175,15 +154,33 @@ const categoryList: Category[] = [
   },
 ];
 
-// Her kategorinin ürünleri ucuzdan pahalıya sıralanır; fiyatsız ürünler sonda kalır.
-export const categories: Category[] = categoryList.map((c) => ({
-  ...c,
-  products: [...c.products].sort((a, b) => {
-    if (a.price === undefined) return b.price === undefined ? 0 : 1;
-    if (b.price === undefined) return -1;
-    return a.price - b.price;
-  }),
-}));
+export const STORE_LABELS: Record<Store, string> = {
+  trendyol: "Trendyol",
+  hepsiburada: "Hepsiburada",
+  amazon: "Amazon",
+  resmi: "Resmi Site",
+  diger: "Mağaza",
+};
+
+/** Linkten mağazayı tahmin eder; `store` yazılmışsa o kullanılır. */
+export function storeOf(product: Product): Store {
+  if (product.store) return product.store;
+  let host = "";
+  try {
+    host = new URL(product.url).hostname.toLowerCase();
+  } catch {
+    return "diger";
+  }
+  if (/(^|\.)trendyol\.com$|(^|\.)ty\.gl$/.test(host)) return "trendyol";
+  if (/(^|\.)hepsiburada\.com$|(^|\.)hb\.biz$/.test(host)) return "hepsiburada";
+  if (/(^|\.)amazon\.com\.tr$|(^|\.)amzn\.(to|eu)$/.test(host)) return "amazon";
+  return "diger";
+}
+
+/** Ürün adı yazılmamışsa (Amazon'dan gelmesi beklenen ürünler) geçici ad */
+export function fallbackName(product: Product): string {
+  return product.name ?? `${STORE_LABELS[storeOf(product)]} ürünü`;
+}
 
 export function formatPrice(price: number): string {
   return new Intl.NumberFormat("tr-TR", {
@@ -193,18 +190,13 @@ export function formatPrice(price: number): string {
   }).format(price);
 }
 
-export const STORE_LABELS: Record<Store, string> = {
-  trendyol: "Trendyol",
-  hepsiburada: "Hepsiburada",
-  amazon: "Amazon",
-  resmi: "Resmi Site",
-  diger: "Mağaza",
-};
-
 export const SITE_URL = "https://www.gururguner.com";
 
 // Kök dizinde zaten kullanılan adresler; kategori slug'ı bunlardan biri olamaz.
 const RESERVED_SLUGS = new Set(["linklerim", "nfc", "git", "api", "_next"]);
+
+/** Statik liste (adresler, yönlendirmeler ve sayfa başlıkları için). Canlı fiyatlar için bkz. catalog.ts */
+export const categories: Category[] = categoryList;
 
 export function getCategory(slug: string): Category | undefined {
   return categories.find((c) => c.slug === slug);
@@ -220,7 +212,7 @@ export function getProduct(id: string): Product | undefined {
 
 export const totalProducts = categories.reduce((sum, c) => sum + c.products.length, 0);
 
-// Geliştirme sırasında hatalı veriyi erkenden yakala (build'i kırar, canlıya bozuk liste çıkmaz).
+// Hatalı veriyi derleme sırasında yakala (build başarısız olur, canlı site bozulmaz).
 (function validate() {
   const slugs = new Set<string>();
   const ids = new Set<string>();
@@ -231,6 +223,14 @@ export const totalProducts = categories.reduce((sum, c) => sum + c.products.leng
     for (const p of c.products) {
       if (ids.has(p.id)) throw new Error(`Aynı ürün id'si iki kez kullanılmış: "${p.id}"`);
       ids.add(p.id);
+      try {
+        new URL(p.url);
+      } catch {
+        throw new Error(`"${p.id}" ürününün linki geçersiz: ${p.url}`);
+      }
+      if (!p.name && storeOf(p) !== "amazon") {
+        throw new Error(`"${p.id}" ürününün adı (name) eksik. Ad sadece Amazon ürünlerinde otomatik gelir.`);
+      }
     }
   }
 })();

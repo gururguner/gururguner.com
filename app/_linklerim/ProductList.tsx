@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { formatPrice, STORE_LABELS, type Product, type Store } from "./data";
+import type { LiveProduct as Product } from "./catalog";
+import { formatPrice, STORE_LABELS, type Store } from "./data";
 import { encodeQr, qrToSvgPath } from "./qr";
 
 const STORE_STYLES: Record<Store, string> = {
@@ -39,7 +40,7 @@ function CopyCodeButton({ code }: { code: string }) {
 
 function QrModal({ product, onClose }: { product: Product; onClose: () => void }) {
   // QR doğrudan mağaza linkini taşır; telefonda taranınca ürün mağazanın uygulamasında açılır.
-  const qr = useMemo(() => qrToSvgPath(encodeQr(product.url)), [product.url]);
+  const qr = useMemo(() => qrToSvgPath(encodeQr(product.directUrl)), [product.directUrl]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -99,6 +100,8 @@ function ProductThumb({ product }: { product: Product }) {
         alt={product.name}
         width={64}
         height={64}
+        // Amazon görselleri zaten küçük ve optimize; Vercel görsel kotasını harcamayalım.
+        unoptimized={product.image.startsWith("http")}
         className="h-16 w-16 shrink-0 rounded-xl bg-white object-contain p-1"
       />
     );
@@ -130,18 +133,31 @@ export function ProductList({ products }: { products: Product[] }) {
         {products.map((product) => (
           <li
             key={product.id}
-            className="rounded-2xl border border-zinc-800 bg-zinc-950 p-3 transition hover:border-orange-500/60"
+            className={`rounded-2xl border border-zinc-800 bg-zinc-950 p-3 transition hover:border-orange-500/60 ${
+              product.inStock === false ? "opacity-60" : ""
+            }`}
           >
             <a {...productLinkProps(product)} className="flex items-center gap-3">
               <ProductThumb product={product} />
               <div className="min-w-0 flex-1">
-                <span className={`inline-block rounded-full border px-2 py-0.5 text-[11px] font-bold ${STORE_STYLES[product.store]}`}>
-                  {STORE_LABELS[product.store]}
-                </span>
-                <h3 className="mt-1 font-bold leading-snug">{product.name}</h3>
-                {product.price !== undefined && (
-                  <p className="mt-0.5 text-sm font-bold text-orange-400" title="Yaklaşık fiyat; güncel fiyat mağazada">
-                    ~{formatPrice(product.price)}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className={`inline-block rounded-full border px-2 py-0.5 text-[11px] font-bold ${STORE_STYLES[product.store]}`}>
+                    {STORE_LABELS[product.store]}
+                  </span>
+                  {product.inStock === false && (
+                    <span className="inline-block rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[11px] font-bold text-zinc-400">
+                      Stokta yok
+                    </span>
+                  )}
+                </div>
+                <h3 className="mt-1 line-clamp-2 font-bold leading-snug">{product.name}</h3>
+                {product.price !== undefined && product.inStock !== false && (
+                  <p
+                    className="mt-0.5 text-sm font-bold text-orange-400"
+                    title={product.livePrice ? "Mağazadan alınan son fiyat" : "Yaklaşık fiyat; güncel fiyat mağazada"}
+                  >
+                    {product.livePrice ? "" : "~"}
+                    {formatPrice(product.price)}
                   </p>
                 )}
                 {product.note && <p className="mt-0.5 text-sm leading-5 text-zinc-400">{product.note}</p>}

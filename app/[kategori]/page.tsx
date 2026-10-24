@@ -5,6 +5,9 @@ import { categories, getCategory, SITE_URL } from "../_linklerim/data";
 
 // Kısa kategori adresleri (gururguner.com/3d, /ekipman ...) Linklerim sayfasını o kategori açık şekilde gösterir.
 // Listede olmayan bir adres 404 verir.
+// Sayfa en fazla saatte bir yeniden oluşturulur; Amazon fiyat ve stokları böyle güncel kalır.
+export const revalidate = 3600;
+
 export const dynamicParams = false;
 
 export function generateStaticParams() {

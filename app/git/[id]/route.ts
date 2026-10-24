@@ -1,3 +1,4 @@
+import { withAmazonTag } from "../../_linklerim/catalog";
 import { getProduct } from "../../_linklerim/data";
 
 // gururguner.com/git/<id> → ürünün mağaza linkine yönlendirir.
@@ -17,7 +18,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   return new Response(null, {
     status: 302,
     headers: {
-      Location: product.url,
+      Location: withAmazonTag(product.url),
       "Cache-Control": "no-store",
       "X-Robots-Tag": "noindex",
     },
