@@ -73,12 +73,10 @@ function QrModal({ product, onClose }: { product: Product; onClose: () => void }
         </p>
         <div className="mt-5 grid gap-2">
           <a
-            href={`/git/${product.id}`}
-            target="_blank"
-            rel="noreferrer nofollow sponsored"
+            {...productLinkProps(product)}
             className="rounded-full bg-orange-500 px-5 py-3 font-bold text-black transition hover:bg-orange-400"
           >
-            Ürüne Git →
+            Ürüne Git ↗
           </a>
           <button
             type="button"
@@ -99,60 +97,65 @@ function ProductThumb({ product }: { product: Product }) {
       <Image
         src={product.image}
         alt={product.name}
-        width={80}
-        height={80}
-        className="h-20 w-20 shrink-0 rounded-2xl bg-white object-contain p-1"
+        width={64}
+        height={64}
+        className="h-16 w-16 shrink-0 rounded-xl bg-white object-contain p-1"
       />
     );
   }
   return (
-    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500/30 to-orange-800/30 text-3xl font-bold text-orange-200">
+    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500/30 to-orange-800/30 text-2xl font-bold text-orange-200">
       {product.name.charAt(0)}
     </div>
   );
 }
 
+// Ürün linkleri her zaman yeni sekmede açılır.
+const productLinkProps = (product: Product) => ({
+  href: `/git/${product.id}`,
+  target: "_blank",
+  rel: "noopener noreferrer nofollow sponsored",
+});
+
 export function ProductList({ products }: { products: Product[] }) {
   const [qrProduct, setQrProduct] = useState<Product | null>(null);
 
   if (products.length === 0) {
-    return <p className="mt-8 text-center text-zinc-500">Bu kategoriye yakında ürün eklenecek.</p>;
+    return <p className="py-4 text-center text-sm text-zinc-500">Bu kategoriye yakında ürün eklenecek.</p>;
   }
 
   return (
     <>
-      <ul className="mt-6 grid gap-4 md:grid-cols-2">
+      <ul className="grid gap-3">
         {products.map((product) => (
           <li
             key={product.id}
-            className="flex flex-col rounded-3xl border border-zinc-800 bg-zinc-950 p-4 transition hover:border-orange-500/60"
+            className="rounded-2xl border border-zinc-800 bg-zinc-950 p-3 transition hover:border-orange-500/60"
           >
-            <div className="flex gap-4">
+            <a {...productLinkProps(product)} className="flex items-center gap-3">
               <ProductThumb product={product} />
-              <div className="min-w-0">
-                <span className={`inline-block rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${STORE_STYLES[product.store]}`}>
+              <div className="min-w-0 flex-1">
+                <span className={`inline-block rounded-full border px-2 py-0.5 text-[11px] font-bold ${STORE_STYLES[product.store]}`}>
                   {STORE_LABELS[product.store]}
                 </span>
-                <h3 className="mt-1.5 font-bold leading-snug">{product.name}</h3>
-                {product.note && <p className="mt-1 text-sm leading-5 text-zinc-400">{product.note}</p>}
+                <h3 className="mt-1 font-bold leading-snug">{product.name}</h3>
+                {product.note && <p className="mt-0.5 text-sm leading-5 text-zinc-400">{product.note}</p>}
               </div>
-            </div>
+            </a>
 
-            <div className="mt-4 flex flex-wrap items-center gap-2 md:mt-auto md:pt-4">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               <a
-                href={`/git/${product.id}`}
-                target="_blank"
-                rel="noreferrer nofollow sponsored"
+                {...productLinkProps(product)}
                 className="rounded-full bg-orange-500 px-5 py-2 text-sm font-bold text-black transition hover:bg-orange-400"
               >
-                Ürüne Git →
+                Ürüne Git ↗
               </a>
               {product.code && <CopyCodeButton code={product.code} />}
               {product.reviewUrl && (
                 <a
                   href={product.reviewUrl}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="rounded-full border border-zinc-700 px-4 py-2 text-sm font-bold text-zinc-200 transition hover:border-orange-400 hover:text-orange-400"
                 >
                   ▶ İncelemeyi İzle
@@ -176,7 +179,7 @@ export function ProductList({ products }: { products: Product[] }) {
   );
 }
 
-export function ShareButton({ title, path }: { title: string; path: string }) {
+export function ShareButton({ title, path, label = "Paylaş" }: { title: string; path: string; label?: string }) {
   const [copied, setCopied] = useState(false);
 
   const share = async () => {
@@ -203,9 +206,9 @@ export function ShareButton({ title, path }: { title: string; path: string }) {
     <button
       type="button"
       onClick={share}
-      className="shrink-0 rounded-full border border-zinc-700 px-4 py-2 text-sm font-bold text-zinc-200 transition hover:border-orange-400 hover:text-orange-400"
+      className="shrink-0 rounded-full px-3 py-1.5 text-xs font-bold text-zinc-400 transition hover:text-orange-400"
     >
-      {copied ? "Link kopyalandı ✓" : "Paylaş"}
+      {copied ? "Link kopyalandı ✓" : `↗ ${label}`}
     </button>
   );
 }

@@ -25,7 +25,7 @@ export function LinklerimHeader({ subtitle }: { subtitle: string }) {
             key={s.type}
             href={s.href}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             aria-label={s.label}
             className="transition hover:scale-110"
           >
@@ -34,9 +34,8 @@ export function LinklerimHeader({ subtitle }: { subtitle: string }) {
         ))}
       </div>
 
-      <p className="mx-auto mt-6 max-w-sm rounded-2xl border border-orange-500/30 bg-orange-500/10 px-4 py-3 text-xs leading-5 text-orange-200">
-        <strong className="font-bold text-orange-300">Reklam</strong> · Bu sayfadaki bazı linkler satış
-        ortaklığı linkidir. Bu linklerden alışveriş yapmanın size ek bir maliyeti yoktur.
+      <p className="mx-auto mt-5 max-w-sm text-xs leading-5 text-zinc-500">
+        Reklam · Bazı linkler satış ortaklığı linkidir, fiyat senin için değişmez.
       </p>
     </header>
   );
