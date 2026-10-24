@@ -1,8 +1,14 @@
 import Image from "next/image";
 
-type LinkIconType = "instagram" | "youtube" | "tiktok" | "email";
+type LinkIconType = "instagram" | "youtube" | "tiktok" | "email" | "shop";
 
 const links = [
+  {
+    title: "Kullandığım Ürünler",
+    subtitle: "Linklerim · indirim kodları",
+    href: "/linklerim",
+    icon: "shop" as LinkIconType,
+  },
   {
     title: "Instagram",
     subtitle: "@gururguner1",
@@ -55,6 +61,16 @@ function LinkIcon({ type }: { type: LinkIconType }) {
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black">
         <svg viewBox="0 0 24 24" className="h-5 w-5 fill-white">
           <path d="M14.6 3h2.2c.2 1.7 1.2 3 2.7 3.9v2.3a6 6 0 0 1-2.9-.9v6.6a5.6 5.6 0 1 1-5.6-5.6c.4 0 .8 0 1.1.1v2.3a3.3 3.3 0 1 0 2.5 3.2V3Z" />
+        </svg>
+      </div>
+    );
+  }
+
+  if (type === "shop") {
+    return (
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500">
+        <svg viewBox="0 0 24 24" className="h-5 w-5 fill-black">
+          <path d="M7 7V6a5 5 0 0 1 10 0v1h2.2a1 1 0 0 1 1 .92l1 12A2 2 0 0 1 19.2 22H4.8a2 2 0 0 1-2-2.08l1-12A1 1 0 0 1 4.8 7H7Zm2 0h6V6a3 3 0 0 0-6 0v1Zm-3.28 2-.9 11h14.36l-.9-11H17v2a1 1 0 1 1-2 0V9H9v2a1 1 0 1 1-2 0V9H5.72Z" />
         </svg>
       </div>
     );
