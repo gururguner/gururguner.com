@@ -43,6 +43,8 @@ export type Catalog = {
   totalProducts: number;
   /** Amazon fiyatlarının alındığı an (Amazon kuralı gereği sayfada gösterilir) */
   amazonUpdatedAt?: string;
+  /** Veri Google Sheets'ten mi yoksa örnek veriden mi geldi */
+  source: "sheet" | "sample";
 };
 
 /** Amazon linkine satış ortaklığı etiketini ekler (yoksa). */
@@ -167,6 +169,7 @@ export async function getCatalog(): Promise<Catalog> {
     categories,
     totalProducts: categories.reduce((n, c) => n + c.products.length, 0),
     amazonUpdatedAt: amazon.items.size > 0 ? amazon.fetchedAt?.toISOString() : undefined,
+    source: sheet.source,
   };
 }
 

@@ -19,7 +19,7 @@ export async function LinklerimView({ initialOpen }: { initialOpen?: string }) {
   const visible = catalog.categories.filter((c) => c.products.length > 0 || c.slug === initialOpen);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#0f0f0f] px-5 py-10 text-white">
+    <main data-kaynak={catalog.source} className="relative min-h-screen overflow-hidden bg-[#0f0f0f] px-5 py-10 text-white">
       <div className="pointer-events-none absolute right-[-120px] top-[-120px] h-80 w-80 rounded-full bg-orange-500/20 blur-3xl" />
       <div className="pointer-events-none absolute bottom-20 left-[-120px] h-80 w-80 rounded-full bg-orange-700/20 blur-3xl" />
 
