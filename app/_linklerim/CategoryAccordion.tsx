@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Category } from "./data";
+import type { LiveCategory as Category } from "./catalog";
 import { ProductList, ShareButton } from "./ProductList";
 
 /**
